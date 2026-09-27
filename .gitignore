@@ -1,0 +1,12 @@
+# NEVER commit the API key
+lta_key.txt
+*.key
+
+# local scratch
+ev_sample.json
+ev_collect.log
+ev_raw.csv
+*_hourly.csv
+.ev_last_feed
+__pycache__/
+.DS_Store

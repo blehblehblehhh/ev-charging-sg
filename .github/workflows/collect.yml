@@ -1,0 +1,46 @@
+name: Collect EV charger availability
+
+on:
+  schedule:
+    # every 30 minutes. GitHub runs this in UTC and may fire a few
+    # minutes late — that is fine, we aggregate to hourly anyway.
+    - cron: '0,30 * * * *'
+  workflow_dispatch:        # gives you a "Run workflow" button for testing
+
+permissions:
+  contents: write           # needed so the job can commit the data back
+
+concurrency:
+  group: ev-collect         # never let two runs fight over the same commit
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Poll the LTA feed once
+        env:
+          LTA_KEY: ${{ secrets.LTA_KEY }}
+          TZ: Asia/Singapore
+        run: python ev_collect.py once --dir data
+
+      - name: Commit whatever it wrote
+        run: |
+          git config user.name  "ev-collector"
+          git config user.email "actions@github.com"
+          git add data
+          if git diff --staged --quiet; then
+            echo "nothing new this run"
+          else
+            git commit -m "data: $(TZ=Asia/Singapore date '+%Y-%m-%d %H:%M SGT')"
+            git pull --rebase --autostash
+            git push
+          fi

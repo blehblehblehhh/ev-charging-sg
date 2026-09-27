@@ -4,7 +4,7 @@ on:
   schedule:
     # every 30 minutes. GitHub runs this in UTC and may fire a few
     # minutes late — that is fine, we aggregate to hourly anyway.
-    - cron: '0,30 * * * *'
+    - cron: '9,39 * * * *'
   workflow_dispatch:        # gives you a "Run workflow" button for testing
 
 permissions:
